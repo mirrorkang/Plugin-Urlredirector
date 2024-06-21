@@ -1,4 +1,6 @@
+// var redirectsJson = require('./Redirector-nike');
 var REDIRECTS = []; // The global redirects list...
+
 var options = {
 	isSyncEnabled : false
 };

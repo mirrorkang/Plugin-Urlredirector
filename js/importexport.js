@@ -67,6 +67,9 @@ function importRedirects(ev) {
 	}
 }
 
+
+
+
 function updateExportLink() {
 	var redirects = REDIRECTS.map(function(r) {
 		return new Redirect(r).toObject();
@@ -89,8 +92,9 @@ function updateExportLink() {
 updateExportLink();
 
 function setupImportExportEventListeners() {
-	el("#import-file").addEventListener('change', importRedirects);
+	// el("#import-file").addEventListener('change', importRedirects);
 	el("#export-link").addEventListener('mousedown', updateExportLink);
 }
+
 
 setupImportExportEventListeners();
