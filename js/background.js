@@ -436,7 +436,7 @@ function sendNotifications(redirect, originalUrl, redirectedUrl ){
 	if(navigator.userAgent.toLowerCase().indexOf("chrome") > -1 && navigator.userAgent.toLowerCase().indexOf("opr")<0){
 		
 		var items = [{title:"Original page: ", message: originalUrl},{title:"Redirected to: ",message: redirectedUrl}];
-		var head = "Redirector - Applied rule : " + redirect.description;
+		var head = redirect.description;
 		chrome.notifications.create({
 			type : "list",
 			items : items,

@@ -76,8 +76,8 @@ function editFormChange() {
 var deleteIndex;
 function confirmDeleteRedirect(index) {
 	deleteIndex = index;
-		let redirect = REDIRECTS[deleteIndex];
-		showForm('#delete-redirect-form', redirect);
+	let redirect = REDIRECTS[deleteIndex];
+	showForm('#delete-redirect-form', redirect);
 }
 
 function deleteRedirect() {
@@ -88,6 +88,18 @@ function deleteRedirect() {
 	saveChanges();
 	hideForm('#delete-redirect-form');
 }
+
+function deleteAll() {
+	REDIRECTS.length = 0;
+	let parentElement = el('.redirect-rows');
+	// 遍历子节点并删除
+	while (parentElement.firstChild) {
+		parentElement.removeChild(parentElement.firstChild);
+	}
+	updateBindings();
+	saveChanges();
+}
+
 
 function cancelDelete() {
 	hideForm('#delete-redirect-form');
@@ -107,6 +119,7 @@ function setupEditAndDeleteEventListeners() {
 	el('#create-new-redirect').addEventListener('click', createNewRedirect);
 	//Listen to any change from the edit form...
 	el('#edit-redirect-form').addEventListener('input', editFormChange);
+	el('#delete-all').addEventListener('click', deleteAll);
 }
 
 

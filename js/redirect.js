@@ -57,6 +57,7 @@ Redirect.prototype = {
 
 	equals : function(redirect) {
 		return this.description == redirect.description
+			&& this.repo == redirect.repo
 			&& this.exampleUrl == redirect.exampleUrl
 			&& this.includePattern == redirect.includePattern
 			&& this.excludePattern == redirect.excludePattern
@@ -70,6 +71,7 @@ Redirect.prototype = {
 	toObject : function() {
 		return {
 			description : this.description,
+			repo : this.repo,
 			exampleUrl : this.exampleUrl,
 			exampleResult : this.exampleResult,
 			error : this.error,
@@ -214,6 +216,7 @@ Redirect.prototype = {
 	_init : function(o) {
 		o = o || {};
 		this.description = o.description || '';
+		this.repo = o.repo || '';
 		this.exampleUrl = o.exampleUrl || '';
 		this.exampleResult = o.exampleResult || '';
 		this.error = o.error || null;

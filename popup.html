@@ -10,13 +10,25 @@
 		<div class="disabled"><span data-show="disabled" style="display: none;">Disabled</span></div>
 		<button id="toggle-disabled"><span data-show="disabled" style="display:none">Enable Redirector</span><span data-show="!disabled">Disable Redirector</span></button>
         <button id="open-redirector-settings">Edit Redirects</button>
-		<label><span>Nike Env</span><input id="currutEnv" type="text" data-bind="currutEnv" /> </label>
+		<div class="currurt-env">
+			<label>
+				<span>Nike Env: </span>
+				<input id="currutEnv" type="text" data-bind="currutEnv" />
+			</label>
+		</div>
 
+
+		<!-- <div id="pages" style="display: flex;">
+			
+		</div> -->
 		<label><input id="enable-logging" type="checkbox" data-bind="logging" /> <span>Enable logging</span></label>
 		<label><input id="enable-notifications" type="checkbox" data-bind="enableNotifications" /> <span>Enable notifications</span></label>
 		<script src="js/stub.js"></script>
 		<script src="js/util.js"></script>
 		<script src="js/redirect.js"></script>
+
+		<script src="js/redirectorpage.js"></script>
+		<script src="js/importexport.js"></script>
 		<script src="js/popup.js"></script>
 	</body>
 </html>
