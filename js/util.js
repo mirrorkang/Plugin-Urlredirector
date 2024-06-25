@@ -92,6 +92,17 @@ function hideForm(selector) {
 	el('#blur-wrapper').classList.remove('blur');
 }
 
+// 定义一个防抖函数
+function debounce(func, wait) {
+    let timeout;
+    return function() {
+        const context = this, args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+}
+
+
 // Shows a message bar above the list of redirects.
 function showMessage(message, success) {
 	let messageBox = document.getElementById('message-box');

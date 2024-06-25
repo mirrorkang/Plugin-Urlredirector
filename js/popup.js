@@ -15,20 +15,23 @@ function toggle(prop) {
 	});
 }
 
+// Todo 修改后的 inputValue 函数，使用防抖
 function inputValue(e, prop) {
-	const value = e.target.value;
-	storage.get({ [prop]: 'staging' }, function (obj) {
-		if (!value || value == obj[prop]) {
-			return;
-		}
-		storage.set({ [prop]: value });
-		viewModel[prop] = value;
-		applyBinding();
-		chrome.runtime.sendMessage({ type: 'currutEnv', currutEnv: value }, function (response) {
-			console.log(11, response);
-		});
+    const value = e.target.value;
 
-	});
+    // 使用防抖包装的逻辑
+    const debouncedInputLogic = debounce(function(value) {
+        storage.get({ [prop]: 'staging' }, function (obj) {
+            if (!value || value == obj[prop]) {
+                return;
+            }
+            storage.set({ [prop]: value });
+            viewModel[prop] = value;
+            applyBinding();
+        });
+    }, 500); // 设置防抖延迟为 500 毫秒
+
+    debouncedInputLogic(value);
 }
 
 function openRedirectorSettings() {
@@ -96,7 +99,7 @@ function pageLoad() {
 		applyBinding();
 	})
 
-	el('#currutEnv').addEventListener('mouseout', (e) => inputValue(e, 'currutEnv'));
+	el('#currutEnv').addEventListener('keyup', (e) => inputValue(e, 'currutEnv'));
 	el('#enable-notifications').addEventListener('input', () => toggle('enableNotifications'));
 	el('#enable-logging').addEventListener('input', () => toggle('logging'));
 	el('#toggle-disabled').addEventListener('click', () => toggle('disabled'));

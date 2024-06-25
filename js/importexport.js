@@ -301,7 +301,7 @@ let data = {
 		{
 			"description": "pdp (with nikeEnv in origin url)",
 			"repo": "pdp",
-			"exampleUrl": "https://www.nike.com.cn/t/sportswear-%E7%94%B7%E5%AD%90%E5%85%A8%E9%95%BF%E6%8B%89%E9%93%BE%E5%BC%80%E8%A5%9F%E9%92%88%E7%BB%87%E8%BF%9E%E5%B8%BD%E8%A1%AB-VhbrCx/DM6549-072?abc=123&nikeEnv=dev&ts=1231312",
+			"exampleUrl": "https://www.nike.com.cn/t/sportswear-%E7%94%B7%E5%AD%90%E5%85%A8%E9%95%BF%E6%8B%89%E9%93%BE%E5%BC%80%E8%A5%9F%E9%92%88%E7%BB%87%E8%BF%9E%E5%B8%BD%E8%A1%AB-VhbrCx/DM6549-072?abc=123&nikeEnv=staging&ts=1231312",
 			"exampleResult": "https://www.nike.com.cn/t-dark/sportswear-%E7%94%B7%E5%AD%90%E5%85%A8%E9%95%BF%E6%8B%89%E9%93%BE%E5%BC%80%E8%A5%9F%E9%92%88%E7%BB%87%E8%BF%9E%E5%B8%BD%E8%A1%AB-VhbrCx/DM6549-072?abc=123&nikeEnv=staging&ts=1231312",
 			"error": null,
 			"includePattern": "^(https:\\/\\/www.nike.com.cn\\/t(?:-dark){0,1}\\/)(.+(?=nikeEnv=[^$]*))(?:[?&]*nikeEnv=[^&]*)?([&]?.*|$)",
@@ -391,17 +391,24 @@ let data = {
 	]
 }
 
-chrome.runtime.onMessage.addListener(
-	function (request, sender, sendResponse) {
-		if (request.type == 'currutEnv') {
-			console.log(33, 'request');
-			getNikeJson(request.currutEnv)
+chrome.storage.onChanged.addListener(function (changes, namespace) {
+	for (let key in changes) {
+		let storageChange = changes[key];
+		if (key === 'currutEnv') {
+			initRedirects(storageChange.newValue)
 		}
-
-		return true; //This tells the browser to keep sendResponse alive because
-		//we're sending the response asynchronously.
 	}
-);
+})
+// chrome.runtime.onMessage.addListener(
+// 	function (request, sender, sendResponse) {
+// 		if (request.type == 'currutEnv') {
+// 			initRedirects(request.currutEnv)
+// 		}
+
+// 		return true; //This tells the browser to keep sendResponse alive because
+// 		//we're sending the response asynchronously.
+// 	}
+// );
 
 function getUniqueRepos(data) {
 	let repos = data.redirects.map(item => item.repo);
@@ -409,51 +416,54 @@ function getUniqueRepos(data) {
 	return uniqueRepos;
 }
 
-function getNikeJson(nikeEnv) {
+function modifyJson(nikeEnv) {
+	let newData = JSON.parse(JSON.stringify(data));
+	newData.redirects.forEach((item) => {
+		item.includePattern = item.includePattern.replace('nikeEnv=staging', `nikeEnv=${nikeEnv}`);
+		item.redirectUrl = item.redirectUrl.replace('nikeEnv=staging', `nikeEnv=${nikeEnv}`);
+		item.exampleUrl = item.exampleUrl.replace('nikeEnv=staging', `nikeEnv=${nikeEnv}`);
+		item.exampleResult = item.exampleResult.replace('nikeEnv=staging', `nikeEnv=${nikeEnv}`);
+	})
+	return newData;
+}
 
-	function getDefaultRedirects(data) {
-		// 先清空数组
-		deleteAll();
-		// try {
-		// 	data = JSON.parse(dataJson);
-		// } catch(e) {
-		// 	console.log(e);
-		// 	showMessage('Failed to parse JSON data, invalid JSON: ' + (e.message||'').substr(0,100));
-		// 	return;
-		// }
+function getUpdatedRedirects(data) {
+	// 先清空数组
+	deleteAll();
+	// try {
+	// 	data = JSON.parse(dataJson);
+	// } catch(e) {
+	// 	console.log(e);
+	// 	showMessage('Failed to parse JSON data, invalid JSON: ' + (e.message||'').substr(0,100));
+	// 	return;
+	// }
 
-		if (!data.redirects) {
-			showMessage('Invalid JSON, missing "redirects" property');
-			return;
-		}
-
-		var imported = 0, existing = 0;
-		for (var i = 0; i < data.redirects.length; i++) {
-			var r = new Redirect(data.redirects[i]);
-			r.updateExampleResult();
-			if (REDIRECTS.some(function (i) { return new Redirect(i).equals(r); })) {
-				existing++;
-			} else {
-				REDIRECTS.push(r.toObject());
-				imported++;
-			}
-		}
-
-		showImportedMessage(imported, existing);
-
-		saveChanges();
-		renderRedirects();
+	if (!data.redirects) {
+		showMessage('Invalid JSON, missing "redirects" property');
+		return;
 	}
 
-	function modifyJson(data) {
-
-		data.redirects.forEach((item) => {
-			item.includePattern = item.includePattern.replace('nikeEnv=staging', `nikeEnv=${nikeEnv}`);
-			item.redirectUrl = item.redirectUrl.replace('nikeEnv=staging', `nikeEnv=${nikeEnv}`);
-		})
-		return data;
+	var imported = 0, existing = 0;
+	for (var i = 0; i < data.redirects.length; i++) {
+		var r = new Redirect(data.redirects[i]);
+		r.updateExampleResult();
+		if (REDIRECTS.some(function (i) { return new Redirect(i).equals(r); })) {
+			existing++;
+		} else {
+			REDIRECTS.push(r.toObject());
+			imported++;
+		}
 	}
-	getDefaultRedirects(modifyJson(data))
+
+	showImportedMessage(imported, existing);
+
+	saveChanges();
+	renderRedirects();
+}
+
+function initRedirects(nikeEnv) {
+	getUpdatedRedirects(modifyJson(nikeEnv))
 }
 
 setupImportExportEventListeners();
+initRedirects('staging')

@@ -64,5 +64,5 @@
    },
    "permissions": [ "webRequest", "webRequestBlocking", "webNavigation", "storage", "tabs", "http://*/*", "https://*/*", "notifications" ],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "3.5.3"
+   "version": "2024"
 }
