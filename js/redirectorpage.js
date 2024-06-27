@@ -17,7 +17,6 @@ function saveChanges() {
 	let arr = REDIRECTS.map(normalize);
 
 	chrome.runtime.sendMessage({ type: "save-redirects", redirects: arr }, function (response) {
-		console.log(response.message);
 		if (response.message.indexOf("Redirects failed to save") > -1) {
 			showMessage(response.message, false);
 		} else {
@@ -127,7 +126,6 @@ function checkIfGroupingExists() {
 
 function toggleDisabled(index) {
 	let grouping = checkIfGroupingExists();
-	console.log();
 
 	if (grouping && grouping.length > 1) {
 		for (let redirect of grouping) {

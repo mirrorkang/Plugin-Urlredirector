@@ -18,6 +18,15 @@ function editRedirect(index) {
 	setTimeout(() => el('input[data-bind="description"]').focus(), 200); //Why not working...?
 }
 
+function editRedirectWithoutHtml(index, callback) {
+	activeRedirect = new Redirect(REDIRECTS[index]); //Make a new one, which we can dump a bunch of stuff on...
+	activeRedirect.existing = true;
+	activeRedirect.index = index;
+	callback(activeRedirect);
+
+	saveRedirect()
+}
+
 function cancelEdit() {
 	activeRedirect = null;
 	hideForm('#edit-redirect-form');

@@ -41,23 +41,26 @@ function importRedirects(ev) {
 			showMessage('Invalid JSON, missing "redirects" property');
 			return;
 		}
-
-		var imported = 0, existing = 0;
-		for (var i = 0; i < data.redirects.length; i++) {
-			var r = new Redirect(data.redirects[i]);
-			r.updateExampleResult();
-			if (REDIRECTS.some(function (i) { return new Redirect(i).equals(r); })) {
-				existing++;
-			} else {
-				REDIRECTS.push(r.toObject());
-				imported++;
+		modifyJson(data.redirects, (redirects) => {
+			var imported = 0, existing = 0;
+			for (var i = 0; i < redirects.length; i++) {
+				var r = new Redirect(redirects[i]);
+				r.updateExampleResult();
+				if (REDIRECTS.some(function (i) { return new Redirect(i).equals(r); })) {
+					existing++;
+				} else {
+					REDIRECTS.push(r.toObject());
+					imported++;
+				}
 			}
-		}
 
-		showImportedMessage(imported, existing);
+			showImportedMessage(imported, existing);
 
-		saveChanges();
-		renderRedirects();
+			saveChanges();
+			renderRedirects();
+		});
+
+
 	};
 
 	try {
@@ -94,79 +97,61 @@ function setupImportExportEventListeners() {
 	el("#export-link").addEventListener('mousedown', updateExportLink);
 }
 
-// chrome.runtime.onMessage.addListener(
-// 	function (request, sender, sendResponse) {
-// 		if (request.type == 'currutEnv') {
-
-// 			initRedirects(request.currutEnv)
-// 		}
-
-// 		return true; //This tells the browser to keep sendResponse alive because
-// 		//we're sending the response asynchronously.
-// 	}
-// );
-
 function getUniqueRepos(redirects) {
 	let repos = redirects.map(item => item.repo);
 	const uniqueRepos = [...new Set(repos)];
 	return uniqueRepos;
 }
 
-
-function getUpdatedRedirects(redirects) {
-	// 先清空数组
-	deleteAll();
-
-	var imported = 0, existing = 0;
-	for (var i = 0; i < redirects.length; i++) {
-		var r = new Redirect(redirects[i]);
-		r.updateExampleResult();
-		if (REDIRECTS.some(function (i) { return new Redirect(i).equals(r); })) {
-			existing++;
-		} else {
-			REDIRECTS.push(r.toObject());
-			imported++;
+/**
+ * 导入时，修改nikeEnv
+ * @param {*} redirects 
+ * @param {*} callback 
+ */
+function modifyJson(redirects, callback) {
+	chrome.storage.local.get('currutEnv', function (obj) {
+		let nikeEnv = obj.currutEnv
+		if (nikeEnv) {
+			let oldReg = /nikeEnv=([^)&$]+)/;
+			let newReg = `nikeEnv=${nikeEnv}`;
+			redirects.forEach((item) => {
+				item.includePattern = item.includePattern.replace(oldReg, newReg);
+				item.redirectUrl = item.redirectUrl.replace(oldReg, newReg);
+	
+				item.exampleUrl = item.exampleUrl.replace(oldReg, newReg);
+				item.exampleResult = item.exampleResult.replace(oldReg, newReg);
+			})
 		}
+		
+		callback(redirects)
+	})
+}
+/**
+ * nikeEnv变化时，修改nikeEnv
+ */
+chrome.storage.onChanged.addListener(function (changes) {
+	if (!changes.currutEnv) {
+		return;
 	}
 
-	showImportedMessage(imported, existing);
+	let nikeEnv = changes.currutEnv.newValue;
 
-	saveChanges();
-	renderRedirects();
-}
-function modifyJson(nikeEnv, callback) {
-	chrome.storage.local.get({ redirects: [] }, function (obj) {
-		console.log('modifyJson', nikeEnv, obj);
-		let redirects = obj.redirects;
-
-		let oldReg = /nikeEnv=([^)&$]+)/;
-		let newReg = `nikeEnv=${nikeEnv}`;
-		redirects.forEach((item) => {
+	let oldReg = /nikeEnv=([^)&$]+)/;
+	let newReg = `nikeEnv=${nikeEnv}`;
+	REDIRECTS.forEach((item, index) => {
+		editRedirectWithoutHtml(index,(item) => {
 			item.includePattern = item.includePattern.replace(oldReg, newReg);
 			item.redirectUrl = item.redirectUrl.replace(oldReg, newReg);
 
 			item.exampleUrl = item.exampleUrl.replace(oldReg, newReg);
 			item.exampleResult = item.exampleResult.replace(oldReg, newReg);
 		})
-		chrome.storage.local.set({ redirects })
-
-		callback(redirects)
+		
 	})
-
-}
-
-function initRedirects(nikeEnv) {
-	modifyJson(nikeEnv, getUpdatedRedirects);
-}
-chrome.storage.onChanged.addListener(function (changes) {
-	changes.currutEnv && initRedirects(changes.currutEnv.newValue);
 })
+
+
 
 setupImportExportEventListeners();
 
-chrome.storage.local.get('currutEnv', function (obj) {
-	if (!obj.currutEnv) {
-		return;
-	}
-	initRedirects(obj.currutEnv);
-})
+
