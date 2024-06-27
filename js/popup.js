@@ -17,16 +17,16 @@ function toggle(prop) {
 
 // Todo 修改后的 inputValue 函数，使用防抖
 function inputValue(e, prop) {
-    const value = e.target.value;
+	const value = e.target.value;
 
-    // // 使用防抖包装的逻辑
-    // const debouncedInputLogic = debounce(function(value) {
+	// // 使用防抖包装的逻辑
+	// const debouncedInputLogic = debounce(function(value) {
 	// 	console.log(11, value, prop);
-      
-    // }, 500); // 设置防抖延迟为 500 毫秒
 
-    // debouncedInputLogic(value);
-	storage.get([prop] , function (obj) {
+	// }, 500); // 设置防抖延迟为 500 毫秒
+
+	// debouncedInputLogic(value);
+	storage.get([prop], function (obj) {
 		// if (!value || value == obj[prop]) {
 		//     return;
 		// }
@@ -116,3 +116,21 @@ function pageLoad() {
 
 pageLoad();
 //Setup page...
+
+function getDefaultsetting() {
+	storage.get('redirects', (obj) => {
+		if (!obj.redirects) {
+			console.log('首次加载');
+			// 首次加载时，如果没有设置，则使用默认配置
+			fetch('../default-setting.json')
+				.then(response => response.json())
+				.then(data => storage.set({ redirects: data.redirects }))
+				.catch(error => console.error(error));
+		}
+
+	})
+
+}
+getDefaultsetting();
+
+
