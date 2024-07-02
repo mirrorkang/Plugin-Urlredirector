@@ -109,8 +109,8 @@ function getUniqueRepos(redirects) {
  * @param {*} callback 
  */
 function modifyJson(redirects, callback) {
-	chrome.storage.local.get('currutEnv', function (obj) {
-		let nikeEnv = obj.currutEnv
+	chrome.storage.local.get('currentEnv', function (obj) {
+		let nikeEnv = obj.currentEnv
 		if (nikeEnv) {
 			let oldReg = /nikeEnv=([^)&$]+)/;
 			let newReg = `nikeEnv=${nikeEnv}`;
@@ -130,11 +130,11 @@ function modifyJson(redirects, callback) {
  * nikeEnv变化时，修改nikeEnv
  */
 chrome.storage.onChanged.addListener(function (changes) {
-	if (!changes.currutEnv) {
+	if (!changes.currentEnv) {
 		return;
 	}
 
-	let nikeEnv = changes.currutEnv.newValue;
+	let nikeEnv = changes.currentEnv.newValue;
 
 	let oldReg = /nikeEnv=([^)&$]+)/;
 	let newReg = `nikeEnv=${nikeEnv}`;

@@ -27,15 +27,15 @@ function inputValue(e, prop) {
 
 	// debouncedInputLogic(value);
 	storage.get([prop], function (obj) {
-		// if (!value || value == obj[prop]) {
+		// if (!value) {
 		//     return;
 		// }
 		console.log('inputValue', value, obj);
-		storage.set({ [prop]: value });
+		storage.set({ [prop]: value || 'staging'});
 		viewModel[prop] = value;
 		applyBinding();
 
-		// chrome.runtime.sendMessage({ type: "currutEnv", currutEnv: value });
+		// chrome.runtime.sendMessage({ type: "currentEnv", currentEnv: value });
 	});
 }
 
@@ -101,13 +101,13 @@ function pageLoad() {
 		logging: false,
 		enableNotifications: false,
 		disabled: false,
-		currutEnv: 'staging'
+		currentEnv: 'staging'
 	}, function (obj) {
 		viewModel = obj;
 		applyBinding();
 	})
 
-	el('#currutEnv').addEventListener('keyup', (e) => inputValue(e, 'currutEnv'));
+	el('#currentEnv').addEventListener('keyup', (e) => inputValue(e, 'currentEnv'));
 	el('#enable-notifications').addEventListener('input', () => toggle('enableNotifications'));
 	el('#enable-logging').addEventListener('input', () => toggle('logging'));
 	el('#toggle-disabled').addEventListener('click', () => toggle('disabled'));
